@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import json
+import pykintone
+
 import logging
 
 import boto3
@@ -32,6 +35,14 @@ response_builder = ResponseBuilder(default_language='ja')
 
 @app.route('/', methods=['GET', 'POST'])
 def lambda_handler(event=None, context=None):
+    r = pykintone.app(
+        "yarou", "5",
+        "BAHSTXI4IJozgIShRbpZiEB16ERrg7AMPDuJ8nsf").select()
+
+    if r.ok:
+        records = r.records
+        logger.info(json.dumps(records, ensure_ascii=False, indent=2))
+
     logger.info('Lambda function invoked index()')
     return 'hello from Flask!'
 
