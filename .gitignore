@@ -1,0 +1,5 @@
+.vagrant
+__pycache__
+bin
+ubuntu-bionic-18.04-cloudimg-console.log
+Vagrantfile
