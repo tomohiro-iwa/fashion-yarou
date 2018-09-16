@@ -1,0 +1,17 @@
+POST https://api.line.me/v2/bot/message/push
+Content-Type: application/json
+Authorization: Bearer HqkmwVBgEnJn9Zvcefg649KXloFCVvz66opiP6M3ofiAkdyChR/6TPNVUCNO4tC3bprqlP7FsFqGDmP2umCoaBMip4x0HWzyKWur7yNujiszpVYlnrr81GNQGqA3DJGbjTQNtkAMNRHU+3xMI5PWsQdB04t89/1O/w1cDnyilFU=
+
+{
+    "to": "Ub89ae62d2101dcf736e4bd4bc33aac0e",
+    "messages":[
+        {
+            "type":"text",
+            "text":"Hello, world1"
+        },
+        {
+            "type":"text",
+            "text":"Hello, world2"
+        }
+    ]
+}
