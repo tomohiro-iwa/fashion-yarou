@@ -15,3 +15,35 @@ Authorization: Bearer HqkmwVBgEnJn9Zvcefg649KXloFCVvz66opiP6M3ofiAkdyChR/6TPNVUC
         }
     ]
 }
+
+###
+POST http://192.168.10.14:5000/callback
+X-Line-Signa: hogehoge	
+
+{
+  "events": [
+    {
+      "replyToken": "0f3779fba3b349968c5d07db31eab56f",
+      "type": "message",
+      "timestamp": 1462629479859,
+      "source": {
+        "type": "user",
+        "userId": "Ub89ae62d2101dcf736e4bd4bc33aac0e"
+      },
+      "message": {
+        "id": "325708",
+        "type": "text",
+        "text": "Hello, world"
+      }
+    },
+    {
+      "replyToken": "8cf9239d56244f4197887e939187e19e",
+      "type": "follow",
+      "timestamp": 1462629479859,
+      "source": {
+        "type": "user",
+        "userId": "Ub89ae62d2101dcf736e4bd4bc33aac0e"
+      }
+    }
+  ]
+}

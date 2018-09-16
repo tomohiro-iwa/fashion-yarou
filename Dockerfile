@@ -1,5 +1,5 @@
 FROM python:3.6
-RUN pip install Flask Flask-Migrate requests boto3 clova-cek-sdk pykintone
+RUN pip install Flask Flask-Migrate requests boto3 clova-cek-sdk pykintone line-bot-sdk
 COPY ./ /app
 WORKDIR /app
 EXPOSE 5000
