@@ -47,3 +47,91 @@ X-Line-Signa: hogehoge
     }
   ]
 }
+
+###
+
+POST https://api.line.me/v2/bot/message/push
+Content-Type: application/json
+Authorization: Bearer HqkmwVBgEnJn9Zvcefg649KXloFCVvz66opiP6M3ofiAkdyChR/6TPNVUCNO4tC3bprqlP7FsFqGDmP2umCoaBMip4x0HWzyKWur7yNujiszpVYlnrr81GNQGqA3DJGbjTQNtkAMNRHU+3xMI5PWsQdB04t89/1O/w1cDnyilFU=
+
+{
+  "to": "Ub89ae62d2101dcf736e4bd4bc33aac0e",
+  "messages": [
+    {
+      "type":"flex",
+      "altText":"this is FLEX",
+      "contents":{
+        "type": "bubble",
+        "header": {
+          "type": "box",
+          "layout": "horizontal",
+          "contents": [
+            {
+              "type": "text",
+              "text": "今日のコーディネート",
+              "weight": "bold",
+              "color": "#aaaaaa",
+              "size": "sm"
+            }
+          ]
+        },
+        "hero": {
+          "type": "image",
+          "url": "https://images.pexels.com/photos/125457/pexels-photo-125457.jpeg",
+          "size": "full",
+          "aspectRatio": "20:13",
+          "aspectMode": "cover"
+        },
+        "body": {
+          "type": "box",
+          "layout": "horizontal",
+          "spacing": "md",
+          "contents": [
+            {
+              "type": "box",
+              "layout": "vertical",
+              "flex": 1,
+              "contents": [
+                {
+                  "type": "image",
+                  "url": "https://1.bp.blogspot.com/-kcV5lUNVWjk/U9y_l53j6tI/AAAAAAAAjfc/ksZGpirKWfM/s800/tenki_mark01_hare.png",
+                  "aspectMode": "cover",
+                  "aspectRatio": "4:3",
+                  "size": "lg",
+                  "gravity": "bottom"
+                }
+              ]
+            },
+            {
+              "type": "box",
+              "layout": "vertical",
+              "flex": 2,
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "晴れ RH 30%",
+                  "gravity": "top",
+                  "size": "md",
+                  "flex": 1
+                },
+                {
+                  "type": "separator"
+                },
+                {
+                  "type": "text",
+                  "text": "Max 28 Min 25 ",
+                  "gravity": "center",
+                  "size": "md",
+                  "flex": 1
+                },
+                {
+                  "type": "separator"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
