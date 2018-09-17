@@ -6,9 +6,6 @@ import pykintone
 
 import logging
 
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
-
 from flask import (
     Flask, request, jsonify, abort
 )
@@ -39,6 +36,7 @@ logger.setLevel(logging.INFO)
 line_bot_api = LineBotApi('HqkmwVBgEnJn9Zvcefg649KXloFCVvz66opiP6M3ofiAkdyChR/6TPNVUCNO4tC3bprqlP7FsFqGDmP2umCoaBMip4x0HWzyKWur7yNujiszpVYlnrr81GNQGqA3DJGbjTQNtkAMNRHU+3xMI5PWsQdB04t89/1O/w1cDnyilFU=') # accesstoken
 handler = WebhookHandler('18cb0127496d12942a5c83fb9b7566c2') #secrettoken
 
+# 取り合えずlineメッセージにはオウム返し
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -102,8 +100,13 @@ Clova RequestHandler 用メソッド
 def launch_request_handler(clova_request):
     # user_id = clova_request.user_id()
     user_id = 'Ub89ae62d2101dcf736e4bd4bc33aac0e'
-    text = 'やっほー！今日のおすすめコーデを送信したぜ！'
-    line_bot_api.push_message(user_id, TextSendMessage(text='秋　雨　長袖'))
+    # --- kintoneにuser_idが登録されているか確認する ---
+    kint_data = 1
+    if kint_data :
+        text = 'やっほー！今日のおすすめコーデを送信したぜ！'
+        line_bot_api.push_message(user_id, TextSendMessage(text='秋　雨　長袖'))
+    else :
+        text = '普段の活動場所を教えてください。どこどこに設定してと話しかけてください。'
     response = response_builder.simple_speech_text(text)
     response_builder.add_reprompt(response, text)
     return response
@@ -111,7 +114,7 @@ def launch_request_handler(clova_request):
 
 @clova.handle.default
 def default_handler(clova_request):
-    return clova.response('もう一度お願いします')
+    return clova.response('もう一度お願いします。わからないことがあれば使い方教えてと聞いてくださいな。')
 
 
 @clova.handle.intent('recommendIntent')
@@ -136,7 +139,61 @@ def find_gourmet_by_prefecture_intent_handler(clova_request):
         text = 'もう一度都道府県名を教えてください。'
         response = response_builder.simple_speech_text(text)
         response_builder.add_reprompt(response, text)
-    # retrun
+
+    return response
+
+@clova.handle.intent('settingIntent')
+def setting_handler(clova_request):
+    # user_id = clova_request.user_id()
+    user_id = 'Ub89ae62d2101dcf736e4bd4bc33aac0e'
+    user_local = clova_request.slot_value('user_local')
+
+    # --- kintoneにidとユーザの地名を登録する処理 ---
+    
+    line_bot_api.push_message(user_id, TextSendMessage(text='setting完了　秋　雨　長袖'))
+    text = '●●に設定されました。コーディネートを送信しました。次回からはスキルの起動時に●●の天気予報をもとにコーディネートいたします。また、遠出の際はどこどこ行くでとお伝えください。'
+    response = response_builder.simple_speech_text(text)
+
+    return response
+
+@clova.handle.intent('weatherIntent')
+def weather_handler(clova_request):
+    # user_id = clova_request.user_id()
+    user_id = 'Ub89ae62d2101dcf736e4bd4bc33aac0e'
+    user_local = clova_request.slot_value('user_local')
+
+    # --- kintoneからとユーザの地名をよむ処理 ---
+    
+    text = '快晴です'
+    response = response_builder.simple_speech_text(text)
+
+    return response
+
+@clova.handle.intent('tempIntent')
+def temp_handler(clova_request):
+    # user_id = clova_request.user_id()
+    user_id = 'Ub89ae62d2101dcf736e4bd4bc33aac0e'
+    user_local = clova_request.slot_value('user_local')
+
+    # --- kintonからユーザの地名を読む処理 ---
+    
+    text = '40どです'
+    response = response_builder.simple_speech_text(text)
+
+    return response
+
+
+@clova.handle.intent("Clova.GuideIntent")
+def guide_intent(clova_request):
+    attributes = clova_request.session_attributes
+    # The session_attributes in the current response will become session_attributes in the next request
+    message = "今日何着てく？どこに行くか教えてな。"
+    if 'HasExplainedService' in attributes:
+        message = "大阪行くで、ゆうてみてな"
+
+    response = response_builder.simple_speech_text(message)
+    response.session_attributes = {'HasExplainedService': True}
+
     return response
 
 '''
