@@ -3,6 +3,7 @@
 import os
 import json
 import pykintone
+import requests
 
 import logging
 
@@ -22,6 +23,20 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
+from pykintone import model
+
+
+class PrefWeather(model.kintoneModel):
+
+    def __init__(self):
+        super(PrefWeather, self).__init__()
+        self.prefecture = ""
+        self.max_temp = 0.0
+        self.min_temp = 0.0
+        self.humidity = ""
+        self.weather = ""
+        self.url1 = ""
+        self.url2 = ""
 
 # flask
 app = Flask(__name__)
@@ -119,11 +134,19 @@ def default_handler(clova_request):
 
 @clova.handle.intent('recommendIntent')
 def find_gourmet_by_prefecture_intent_handler(clova_request):
-    # user_id = clova_request.user_id()
+    #user_id = clova_request.user_id()
     user_id = 'Ub89ae62d2101dcf736e4bd4bc33aac0e'
-    logger.info('recommend method called!!')
     prefecture = clova_request.slot_value('prefecture')
-    logger.info('Prefecture: %s', prefecture)
+    print(prefecture)
+
+    r = pykintone.app(
+        "yarou", "9",
+        "wCOL14ThfaTvEUTBWKa7aQFmTFtU4qtToU7ZCRcV").select('prefecture = "{}"'.format(prefecture)).models(PrefWeather)[0]
+
+    weather='{} humid:{}'.format(r.weather,r.humidity)
+    temp='Max:{} min:{}'.format(r.max_temp,r.min_temp)
+    sendFlexmessage(user_id,r.url1,r.url2,weather,temp)
+
     response = None
     if prefecture is not None:
         try:
@@ -150,7 +173,7 @@ def setting_handler(clova_request):
 
     # --- kintoneにidとユーザの地名を登録する処理 ---
     
-    line_bot_api.push_message(user_id, TextSendMessage(text='setting完了　秋　雨　長袖'))
+    line_bot_api.push_message(user_id, TextSendMessage(text="banana"))
     text = '●●に設定されました。コーディネートを送信しました。次回からはスキルの起動時に●●の天気予報をもとにコーディネートいたします。また、遠出の際はどこどこ行くでとお伝えください。'
     response = response_builder.simple_speech_text(text)
 
@@ -225,6 +248,148 @@ def makeRecommend(prefecture, user_id):
     except Exception as e:
         logger.error('Exception at make_gourmet_info_message_by_prefecture: %s', e)
         raise e
+
+def makeMessage(max_temp,min_temp,sunny):
+    seasonstatus=0
+    if(seasonstatus==0):
+        if(max_temp<6):
+            message="かなり寒い日です、カイロを持って行きましょう"
+        elif(max_temp<11):
+            message="かなり寒い日です、防寒具で対策しましょう"
+        elif(max_temp<16):
+            message="だいぶ寒くなりましたね、セーターやニットを着ても良いでしょう"
+        elif(max_temp<21):
+            if(seasonstatus==0):
+                message="重ね着に最適な気温です、少し暖かい恰好をするといいでしょう"
+            else:
+                message="重ね着に最適な気温です。何かアウターを羽織るといいでしょう"
+        elif(max_temp<26):
+            if(seasonstatus==0 and sunny):
+                message="今日は良い天気ですね、半袖でもいいでしょう"
+            elif(seasonstatus==0):
+                message="今日はあいにくの天気ですので、少し寒くなりそうです"
+            elif(seasonstatus==1 and sunny):
+                message="今日は良い天気ですね、秋のファッションを楽しみましょう"
+            else:
+                message="寒くなってきましたね、上着を用意しておくと安心ですよ"
+        elif(max_temp<31):
+            if(seasonstatus==0 and min_temp>=25):
+                message="だんだん暑くなってきましたね、もうすぐ夏本番です"
+            elif(seasonstatus==0 and min_temp<25):
+                message="夜は肌寒くなる可能性があります、羽織り物があるといいかもしれません"
+            elif(seasonstatus==1 and min_temp>=25):
+                message="少し過ごし易くなりましたね、もうすぐ秋ですね"
+            else:
+                message="夜は肌寒くなる可能性があります、長袖でも良いかもしれません"
+        elif(max_temp<36):
+            message="今日は真夏日です、涼しい恰好で出かけましょう。"      
+        else:
+             message="今日は猛暑日です、熱中症に気をつけて下さいね。"
+    return message
+
+def sendFlexmessage(user_id,image,weather_image,weather,temp):
+    url = 'https://api.line.me/v2/bot/message/push'
+    dict={"a":user_id,"b":image,"c":weather_image,"d":weather,"e":temp}
+    payload = '''
+{
+  "to": "a",
+  "messages": [
+    {
+      "type":"flex",
+      "altText":"this is FLEX",
+      "contents":{
+        "type": "bubble",
+        "header": {
+          "type": "box",
+          "layout": "horizontal",
+          "contents": [
+            {
+              "type": "text",
+              "text": "chao",
+              "weight": "bold",
+              "color": "#aaaaaa",
+              "size": "sm"
+            }
+          ]
+        },
+        "hero": {
+          "type": "image",
+          "url": "b",
+          "size": "full",
+          "aspectRatio": "20:13",
+          "aspectMode": "cover"
+        },
+        "body": {
+          "type": "box",
+          "layout": "horizontal",
+          "spacing": "md",
+          "contents": [
+            {
+              "type": "box",
+              "layout": "vertical",
+              "flex": 1,
+              "contents": [
+                {
+                  "type": "image",
+                  "url": "c",
+                  "aspectMode": "cover",
+                  "aspectRatio": "4:3",
+                  "size": "lg",
+                  "gravity": "bottom"
+                }
+              ]
+            },
+            {
+              "type": "box",
+              "layout": "vertical",
+              "flex": 2,
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "d",
+                  "gravity": "top",
+                  "size": "md",
+                  "flex": 1
+                },
+                {
+                  "type": "separator"
+                },
+                {
+                  "type": "text",
+                  "text": "e",
+                  "gravity": "center",
+                  "size": "md",
+                  "flex": 1
+                },
+                {
+                  "type": "separator"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+'''#.format(**dict)
+    jisyo = json.loads(payload)
+    jisyo["to"]=user_id
+    jisyo["messages"][0]["contents"]["hero"]["url"]=image
+    jisyo["messages"][0]["contents"]["body"]["contents"][0]["contents"][0]["url"]=weather_image
+    jisyo["messages"][0]["contents"]["body"]["contents"][1]["contents"][0]["text"]=weather
+    jisyo["messages"][0]["contents"]["body"]["contents"][1]["contents"][2]["text"]=temp
+
+    headers = {
+        'content-type': 'application/json',
+        'Authorization': 'Bearer HqkmwVBgEnJn9Zvcefg649KXloFCVvz66opiP6M3ofiAkdyChR/6TPNVUCNO4tC3bprqlP7FsFqGDmP2umCoaBMip4x0HWzyKWur7yNujiszpVYlnrr81GNQGqA3DJGbjTQNtkAMNRHU+3xMI5PWsQdB04t89/1O/w1cDnyilFU='
+    }
+    requests.post(url, data=json.dumps(jisyo), headers=headers)
+
+def check_user(prefecture):
+        r = pykintone.app(
+        "yarou", "9",
+        "wCOL14ThfaTvEUTBWKa7aQFmTFtU4qtToU7ZCRcV").select(('prefecture = "{}"').format(prefecture)).models(PrefWeather)
 
 if __name__ == '__main__':
     app.run(debug=True)
